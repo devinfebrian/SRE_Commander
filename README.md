@@ -1,6 +1,6 @@
 # 🔥 Gemini SRE Commander
 
-> **AI-Powered Incident Response System** — Winner-ready hackathon project built with Bun, TypeScript, and Gemini 3 Flash.
+> **AI-Powered Incident Response System** —  project built with Bun, TypeScript, and Gemini 3 Flash.
 
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black?style=flat-square&logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
@@ -37,8 +37,8 @@ Gemini SRE Commander transforms chaotic system logs and metrics into **actionabl
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd gemini-sre-commander
+git clone https://github.com/devinfebrian/SRE_Commander.git
+cd SRE_Commander
 
 # Install dependencies
 bun install
@@ -153,16 +153,6 @@ const schema = {
 │   └── style.css          # Dark theme + animations
 └── plan/                  # Documentation & design
 ```
-
----
-
-## 🏆 Why This Wins
-
-1. **🎯 Solves a Real Problem** — SREs spend hours on incident analysis; this does it in seconds
-2. **⚡ Fast Demo Loop** — Pre-loaded scenarios = instant gratification for judges
-3. **🧠 Shows Technical Depth** — WebSockets, structured LLM outputs, multimodal AI
-4. **💎 Polished UI** — Dark theme, animations, responsive design
-5. **📖 Complete Story** — Input → Analysis → Action → Export
 
 ---
 
