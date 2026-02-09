@@ -1,0 +1,16 @@
+Timestamp Level Service Message
+2023-11-15 08:59:55 INFO  sys-monitor System health normal. CPU: 15%, Memory: 40%
+2023-11-15 09:00:00 WARN  redis-cluster Eviction threshold reached. Key count: 5,000,000.
+2023-11-15 09:00:01 ERROR redis-cluster OOM command not allowed when used memory > 'maxmemory'.
+2023-11-15 09:00:02 INFO  api-gateway Cache MISS for key: user_profile_12345
+2023-11-15 09:00:02 INFO  api-gateway Cache MISS for key: user_profile_67890
+2023-11-15 09:00:02 INFO  api-gateway Cache MISS for key: product_catalog_global
+2023-11-15 09:00:03 WARN  db-primary Active connections spike: 50 -> 500
+2023-11-15 09:00:04 WARN  db-primary High CPU usage: 85%
+2023-11-15 09:00:05 ERROR db-primary Too many connections. Rejection count: 15
+2023-11-15 09:00:06 ERROR api-gateway 500 Internal Server Error - DB Connection Timeout
+2023-11-15 09:00:06 ERROR api-gateway 500 Internal Server Error - DB Connection Timeout
+2023-11-15 09:00:07 ERROR api-gateway 500 Internal Server Error - DB Connection Timeout
+2023-11-15 09:00:08 CRIT  load-balancer Latency limits exceeded. P99 > 5000ms
+2023-11-15 09:00:10 ERROR app-server Unhandled Exception: RedisConnectionException: Connection refused (127.0.0.1:6379)
+2023-11-15 09:00:12 CRIT  sys-monitor CPU: 99%, Memory: 95%. Hazard level CRITICAL.

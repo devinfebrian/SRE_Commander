@@ -1,0 +1,8 @@
+Timestamp Level Service Message
+2023-10-27 10:00:01 INFO  api-gateway Received request GET /api/v1/users/123
+2023-10-27 10:00:02 INFO  user-service Querying database for user 123
+2023-10-27 10:00:05 WARN  user-service Database query took 3000ms
+2023-10-27 10:00:06 ERROR user-service ConnectionTimeout: Failed to connect to DB-Primary
+2023-10-27 10:00:06 ERROR api-gateway 500 Internal Server Error
+2023-10-27 10:00:07 INFO  load-balancer Current active connections: 50
+2023-10-27 10:00:10 ERROR db-watcher Replication lag high: 500s

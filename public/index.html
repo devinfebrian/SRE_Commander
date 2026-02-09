@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Gemini SRE Commander</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🔥 Gemini SRE Commander</h1>
+                <div class="header-actions">
+                    <button id="demoBtn" class="btn-secondary">🎮 Load Demo</button>
+                    <button id="streamBtn" class="btn-secondary">📡 Live Stream</button>
+                    <div id="connectionStatus" class="status-indicator offline" title="WebSocket Status"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Input Side -->
+            <aside class="sidebar">
+                <h2>📋 Incident Input</h2>
+
+                <!-- Demo Selector -->
+                <div id="demoSelector" class="demo-selector hidden">
+                    <h3>🎮 Demo Scenarios</h3>
+                    <div id="demoList" class="demo-list"></div>
+                </div>
+
+                <form id="analysisForm">
+                    <div class="form-group">
+                        <label for="logs">📝 System Logs</label>
+                        <div class="input-actions">
+                            <button type="button" id="clearLogs" class="btn-small">Clear</button>
+                            <button type="button" id="sampleLogs" class="btn-small">Load Sample</button>
+                        </div>
+                        <textarea id="logs" name="logs" placeholder="Paste logs here or select a demo scenario..."
+                            required></textarea>
+                        <div class="input-meta">
+                            <span id="logStats">0 lines | 0 KB</span>
+                            <span id="streamingIndicator" class="streaming-badge hidden">● LIVE</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="images">📸 Screenshots & Diagrams</label>
+                        <input type="file" id="images" name="images" multiple accept="image/*">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn-primary">
+                        <span class="btn-icon">🔍</span>
+                        Analyze Incident
+                    </button>
+                </form>
+
+                <!-- Live Stream Panel -->
+                <div id="streamPanel" class="stream-panel hidden">
+                    <h3>📡 Live Log Stream</h3>
+                    <div class="stream-controls">
+                        <button id="startStream" class="btn-success">Start</button>
+                        <button id="stopStream" class="btn-danger hidden">Stop</button>
+                        <button id="forceAnalyze" class="btn-secondary hidden">Analyze Now</button>
+                    </div>
+                    <div class="stream-stats">
+                        <div>Buffered: <span id="bufferSize">0</span> lines</div>
+                        <div>Status: <span id="streamStatus">Idle</span></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Output Side -->
+            <main class="main">
+                <div id="welcome" class="welcome-screen">
+                    <div class="welcome-icon">🔥</div>
+                    <h2>Ready to Analyze</h2>
+                    <p>Upload logs and images, or try a <strong>demo scenario</strong> to see the magic!</p>
+                    <div class="feature-highlights">
+                        <div class="feature">
+                            <span class="feature-icon">🧠</span>
+                            <span>AI-Powered RCA</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📊</span>
+                            <span>Visual Timeline</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📡</span>
+                            <span>Real-time Streaming</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">📖</span>
+                            <span>Auto Runbooks</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <h3>Analyzing with Gemini 3 Flash...</h3>
+                    <p id="loadingDetail">Correlating logs with visual evidence...</p>
+                    <div class="loading-progress">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+
+                <div id="results" class="hidden">
+                    <!-- Incident Header -->
+                    <div class="incident-header">
+                        <div class="incident-title-section">
+                            <h1 id="incidentTitle">Incident Report</h1>
+                            <span id="incidentType" class="incident-type"></span>
+                        </div>
+                        <div class="incident-actions">
+                            <span id="severityBadge" class="severity-badge"></span>
+                            <button id="downloadBtn" class="btn-secondary">
+                                <span class="btn-icon">📥</span>
+                                Export Post-Mortem
+                            </button>
+                            <button id="newAnalysis" class="btn-secondary">
+                                <span class="btn-icon">🔄</span>
+                                New Analysis
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Overview -->
+                    <div class="progress-overview">
+                        <div class="progress-card">
+                            <div class="progress-label">Mitigation Progress</div>
+                            <div class="progress-bar-container">
+                                <div id="mitigationProgress" class="progress-bar-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span id="completedSteps">0</span> / <span id="totalSteps">0</span> steps completed
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Root Cause Analysis -->
+                    <div class="section">
+                        <h2>🎯 Root Cause Analysis</h2>
+                        <div class="card root-cause-card">
+                            <div class="root-cause-content">
+                                <p id="rootCauseSummary" class="root-cause-text"></p>
+                                <div class="confidence-badge">
+                                    <span class="confidence-label">Confidence</span>
+                                    <span id="confidenceScore" class="confidence-value"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Runbook Commands -->
+                    <div class="section">
+                        <h2>📖 Suggested Runbook Commands</h2>
+                        <div id="runbookCommands" class="runbook-list"></div>
+                    </div>
+
+                    <!-- Mitigation Plan -->
+                    <div class="section">
+                        <h2>✅ Mitigation Plan</h2>
+                        <div id="mitigationPlan" class="mitigation-list"></div>
+                    </div>
+
+                    <!-- Evidence -->
+                    <div class="section">
+                        <h2>🔍 Evidence</h2>
+                        <ul id="evidenceList" class="evidence-list"></ul>
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="section">
+                        <h2>📊 Incident Timeline</h2>
+                        <div id="timeline" class="timeline"></div>
+                    </div>
+
+                    <!-- Post-Mortem -->
+                    <div class="section">
+                        <h2>📝 Post-Mortem Draft</h2>
+                        <div class="card postmortem-card">
+                            <div class="postmortem-section">
+                                <h3>💥 Impact</h3>
+                                <p id="pmImpact"></p>
+                            </div>
+                            <div class="postmortem-section">
+                                <h3>❌ What Went Wrong</h3>
+                                <p id="pmWrong"></p>
+                            </div>
+                            <div class="postmortem-section">
+                                <h3>✅ What Went Well</h3>
+                                <p id="pmWell"></p>
+                            </div>
+                            <div class="postmortem-section">
+                                <h3>📋 Action Items</h3>
+                                <ul id="pmActions" class="action-items"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentAnalysis = null;
+        let completedSteps = new Set();
+        let ws = null;
+        let isStreaming = false;
+
+        // DOM Elements
+        const form = document.getElementById('analysisForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const welcome = document.getElementById('welcome');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newAnalysisBtn = document.getElementById('newAnalysis');
+        const demoBtn = document.getElementById('demoBtn');
+        const streamBtn = document.getElementById('streamBtn');
+        const demoSelector = document.getElementById('demoSelector');
+        const streamPanel = document.getElementById('streamPanel');
+        const logsTextarea = document.getElementById('logs');
+        const logStats = document.getElementById('logStats');
+        const connectionStatus = document.getElementById('connectionStatus');
+
+        // Event Listeners
+        form.addEventListener('submit', handleAnalyze);
+        downloadBtn.addEventListener('click', downloadPostmortem);
+        newAnalysisBtn.addEventListener('click', resetAnalysis);
+        demoBtn.addEventListener('click', toggleDemoSelector);
+        streamBtn.addEventListener('click', toggleStreamPanel);
+        document.getElementById('clearLogs').addEventListener('click', () => {
+            logsTextarea.value = '';
+            updateLogStats();
+        });
+        document.getElementById('sampleLogs').addEventListener('click', loadSampleLogs);
+        logsTextarea.addEventListener('input', updateLogStats);
+        document.getElementById('images').addEventListener('change', previewImages);
+
+        // Stream controls
+        document.getElementById('startStream').addEventListener('click', startStreaming);
+        document.getElementById('stopStream').addEventListener('click', stopStreaming);
+        document.getElementById('forceAnalyze').addEventListener('click', forceStreamAnalysis);
+
+        // Load demo scenarios
+        loadDemoScenarios();
+
+        // WebSocket connection
+        connectWebSocket();
+
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws`);
+
+            ws.onopen = () => {
+                connectionStatus.classList.remove('offline');
+                connectionStatus.classList.add('online');
+                connectionStatus.title = 'WebSocket Connected';
+            };
+
+            ws.onclose = () => {
+                connectionStatus.classList.remove('online');
+                connectionStatus.classList.add('offline');
+                connectionStatus.title = 'WebSocket Disconnected';
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+        }
+
+        function handleWebSocketMessage(data) {
+            switch (data.type) {
+                case 'connected':
+                    console.log('WebSocket connected:', data.message);
+                    break;
+                case 'received':
+                    document.getElementById('bufferSize').textContent = data.bufferSize;
+                    break;
+                case 'analyzing':
+                    document.getElementById('streamStatus').textContent = 'Analyzing...';
+                    break;
+                case 'analysis':
+                    document.getElementById('streamStatus').textContent = 'Complete';
+                    renderResults(data.data);
+                    break;
+                case 'error':
+                    document.getElementById('streamStatus').textContent = 'Error';
+                    console.error('Stream error:', data.message);
+                    break;
+            }
+        }
+
+        async function loadDemoScenarios() {
+            try {
+                const response = await fetch('/api/demos');
+                const demos = await response.json();
+
+                const demoList = document.getElementById('demoList');
+                demoList.innerHTML = demos.map(demo => `
+                    <div class="demo-card" data-id="${demo.id}">
+                        <div class="demo-name">${demo.name}</div>
+                        <div class="demo-description">${demo.description}</div>
+                        <span class="demo-severity severity-${demo.severity}">${demo.severity}</span>
+                    </div>
+                `).join('');
+
+                demoList.querySelectorAll('.demo-card').forEach(card => {
+                    card.addEventListener('click', () => loadDemo(card.dataset.id));
+                });
+            } catch (error) {
+                console.error('Failed to load demos:', error);
+            }
+        }
+
+        async function loadDemo(id) {
+            try {
+                const response = await fetch(`/api/demos/${id}`);
+                const scenario = await response.json();
+
+                logsTextarea.value = scenario.logs;
+                updateLogStats();
+                demoSelector.classList.add('hidden');
+
+                // Auto-analyze after loading
+                setTimeout(() => form.dispatchEvent(new Event('submit')), 500);
+            } catch (error) {
+                console.error('Failed to load demo:', error);
+            }
+        }
+
+        function toggleDemoSelector() {
+            demoSelector.classList.toggle('hidden');
+            streamPanel.classList.add('hidden');
+        }
+
+        function toggleStreamPanel() {
+            streamPanel.classList.toggle('hidden');
+            demoSelector.classList.add('hidden');
+        }
+
+        function startStreaming() {
+            isStreaming = true;
+            document.getElementById('startStream').classList.add('hidden');
+            document.getElementById('stopStream').classList.remove('hidden');
+            document.getElementById('forceAnalyze').classList.remove('hidden');
+            document.getElementById('streamingIndicator').classList.remove('hidden');
+            document.getElementById('streamStatus').textContent = 'Streaming...';
+
+            // Simulate log streaming
+            simulateLogStream();
+        }
+
+        function stopStreaming() {
+            isStreaming = false;
+            document.getElementById('startStream').classList.remove('hidden');
+            document.getElementById('stopStream').classList.add('hidden');
+            document.getElementById('forceAnalyze').classList.add('hidden');
+            document.getElementById('streamingIndicator').classList.add('hidden');
+            document.getElementById('streamStatus').textContent = 'Stopped';
+        }
+
+        function simulateLogStream() {
+            if (!isStreaming) return;
+
+            const sampleLog = `[${new Date().toISOString()}] INFO service Log entry ${Date.now()}\n`;
+            logsTextarea.value += sampleLog;
+            updateLogStats();
+
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'logs', logs: sampleLog }));
+            }
+
+            setTimeout(simulateLogStream, 1000);
+        }
+
+        function forceStreamAnalysis() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'analyze' }));
+            }
+        }
+
+        async function handleAnalyze(e) {
+            e.preventDefault();
+
+            welcome.classList.add('hidden');
+            results.classList.add('hidden');
+            loading.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-small"></span> Analyzing...';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error(await response.text());
+
+                const data = await response.json();
+                currentAnalysis = data;
+                completedSteps.clear();
+                renderResults(data);
+            } catch (error) {
+                alert('Analysis failed: ' + error.message);
+                console.error(error);
+                loading.classList.add('hidden');
+                welcome.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span class="btn-icon">🔍</span> Analyze Incident';
+            }
+        }
+
+        async function renderResults(data) {
+            loading.classList.add('hidden');
+            results.classList.remove('hidden');
+
+            // Header
+            document.getElementById('incidentTitle').textContent = data.incident_type;
+            document.getElementById('incidentType').textContent = 'AI-Detected Incident';
+
+            const badge = document.getElementById('severityBadge');
+            badge.textContent = data.severity;
+            badge.className = `severity-badge severity-${data.severity}`;
+
+            // Root Cause
+            document.getElementById('rootCauseSummary').textContent = data.root_cause.summary;
+            document.getElementById('confidenceScore').textContent = `${(data.root_cause.confidence * 100).toFixed(0)}%`;
+
+            // Load and render runbook commands
+            await loadRunbookCommands(data.incident_type);
+
+            // Mitigation Plan with checkboxes
+            const planDiv = document.getElementById('mitigationPlan');
+            document.getElementById('totalSteps').textContent = data.mitigation_plan.length;
+            updateProgress();
+
+            planDiv.innerHTML = data.mitigation_plan.map((step, index) => `
+                <div class="mitigation-card ${completedSteps.has(index) ? 'completed' : ''}" data-index="${index}">
+                    <label class="mitigation-checkbox">
+                        <input type="checkbox" ${completedSteps.has(index) ? 'checked' : ''} onchange="toggleStep(${index})">
+                        <span class="checkmark"></span>
+                    </label>
+                    <div class="mitigation-content">
+                        <div class="mitigation-step-header">
+                            <span class="step-number">Step ${step.step}</span>
+                            ${completedSteps.has(index) ? '<span class="completed-badge">✓ Done</span>' : ''}
+                        </div>
+                        <div class="mitigation-action">${step.action}</div>
+                        <div class="mitigation-risk">
+                            <span class="risk-label">⚠️ Risk:</span>
+                            <span class="risk-text">${step.risk}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Evidence
+            document.getElementById('evidenceList').innerHTML = data.evidence.map(ev => `
+                <li class="evidence-item">
+                    <span class="evidence-source">[${ev.source}]</span>
+                    <span class="evidence-detail">${ev.detail}</span>
+                </li>
+            `).join('');
+
+            // Timeline
+            document.getElementById('timeline').innerHTML = data.timeline.map((t, i) => `
+                <div class="timeline-item" style="--index: ${i}">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <div class="time">${t.time}</div>
+                        <div class="event">${t.event}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Post-Mortem
+            document.getElementById('pmImpact').textContent = data.postmortem.impact;
+            document.getElementById('pmWrong').textContent = data.postmortem.what_went_wrong;
+            document.getElementById('pmWell').textContent = data.postmortem.what_went_well;
+            document.getElementById('pmActions').innerHTML = data.postmortem.action_items.map(item => `
+                <li class="action-item">
+                    <input type="checkbox" class="action-checkbox">
+                    <span>${item}</span>
+                </li>
+            `).join('');
+        }
+
+        async function loadRunbookCommands(incidentType) {
+            try {
+                const response = await fetch(`/api/runbooks/${encodeURIComponent(incidentType)}`);
+                const { commands } = await response.json();
+
+                document.getElementById('runbookCommands').innerHTML = commands.map((cmd, i) => `
+                    <div class="runbook-card" style="--index: ${i}">
+                        <div class="runbook-description">${cmd.description}</div>
+                        <div class="runbook-command-wrapper">
+                            <code class="runbook-command">${escapeHtml(cmd.command)}</code>
+                            <button class="copy-btn" onclick="copyCommand(this, '${escapeHtml(cmd.command)}')">
+                                📋 Copy
+                            </button>
+                        </div>
+                        ${cmd.requiresConfirmation ? '<div class="confirmation-badge">⚠️ Requires Confirmation</div>' : ''}
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load runbook:', error);
+            }
+        }
+
+        function toggleStep(index) {
+            if (completedSteps.has(index)) {
+                completedSteps.delete(index);
+            } else {
+                completedSteps.add(index);
+            }
+            renderResults(currentAnalysis);
+        }
+
+        function updateProgress() {
+            const total = currentAnalysis?.mitigation_plan.length || 0;
+            const completed = completedSteps.size;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+
+            document.getElementById('completedSteps').textContent = completed;
+            document.getElementById('mitigationProgress').style.width = `${percentage}%`;
+        }
+
+        function copyCommand(btn, command) {
+            navigator.clipboard.writeText(command);
+            const original = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => btn.textContent = original, 2000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function downloadPostmortem() {
+            if (!currentAnalysis) return;
+            const markdown = generateMarkdown(currentAnalysis);
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `postmortem-${new Date().toISOString().split('T')[0]}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function generateMarkdown(data) {
+            const completed = Array.from(completedSteps);
+            return `# Incident Post-Mortem: ${data.incident_type}
+Date: ${new Date().toISOString().split('T')[0]}
+Severity: ${data.severity.toUpperCase()}
+
+## Root Cause
+${data.root_cause.summary} (Confidence: ${(data.root_cause.confidence * 100).toFixed(0)}%)
+
+## Impact
+${data.postmortem.impact}
+
+## Timeline
+${data.timeline.map(t => `- **${t.time}**: ${t.event}`).join('\n')}
+
+## Analysis
+### What Went Wrong
+${data.postmortem.what_went_wrong}
+
+### What Went Well
+${data.postmortem.what_went_well}
+
+## Mitigation Steps
+${data.mitigation_plan.map((step, i) => `${completed.includes(i) ? '- [x]' : '- [ ]'} Step ${step.step}: ${step.action}`).join('\n')}
+
+## Action Items
+${data.postmortem.action_items.map(item => `- [ ] ${item}`).join('\n')}
+
+## Evidence
+${data.evidence.map(ev => `- [${ev.source}] ${ev.detail}`).join('\n')}
+`;
+        }
+
+        function resetAnalysis() {
+            welcome.classList.remove('hidden');
+            results.classList.add('hidden');
+            loading.classList.add('hidden');
+            currentAnalysis = null;
+            completedSteps.clear();
+            logsTextarea.value = '';
+            updateLogStats();
+            document.getElementById('images').value = '';
+            document.getElementById('imagePreview').innerHTML = '';
+        }
+
+        function loadSampleLogs() {
+            fetch('/api/demos/db-outage')
+                .then(r => r.json())
+                .then(scenario => {
+                    logsTextarea.value = scenario.logs;
+                    updateLogStats();
+                });
+        }
+
+        function updateLogStats() {
+            const lines = logsTextarea.value.split('\n').filter(l => l.trim()).length;
+            const kb = (logsTextarea.value.length / 1024).toFixed(1);
+            logStats.textContent = `${lines} lines | ${kb} KB`;
+        }
+
+        function previewImages(e) {
+            const files = e.target.files;
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = '';
+
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        preview.innerHTML += `<img src="${e.target.result}" class="preview-thumb">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
