@@ -1,10 +1,10 @@
 # 🔥 Gemini SRE Commander
 
-> **AI-Powered Incident Response System** — Winner-ready hackathon project built with Bun, TypeScript, and Gemini 2.5 Flash.
+> **AI-Powered Incident Response System** — Winner-ready hackathon project built with Bun, TypeScript, and Gemini 3 Flash.
 
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black?style=flat-square&logo=bun)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178c6?style=flat-square&logo=typescript)](https://www.typescriptlang.org)
-[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285f4?style=flat-square&logo=google)](https://ai.google.dev)
+[![Gemini](https://img.shields.io/badge/Gemini-3_Flash-4285f4?style=flat-square&logo=google)](https://ai.google.dev)
 
 ---
 
@@ -20,7 +20,7 @@ Gemini SRE Commander transforms chaotic system logs and metrics into **actionabl
 
 ---
 
-## ✨ Hackathon-Worthy Features
+## ✨ Worthy Features
 
 | Feature | Why It Wins |
 |---------|-------------|
@@ -156,7 +156,7 @@ const schema = {
 
 ---
 
-## 🏆 Why This Wins Hackathons
+## 🏆 Why This Wins
 
 1. **🎯 Solves a Real Problem** — SREs spend hours on incident analysis; this does it in seconds
 2. **⚡ Fast Demo Loop** — Pre-loaded scenarios = instant gratification for judges
@@ -188,14 +188,3 @@ const schema = {
 - [ ] Custom runbook editor
 
 ---
-
-## 📄 License
-
-MIT — Built for hackathons, use it freely!
-
----
-
-<p align="center">
-  <strong>Built with 🔥 by Gemini SRE Commander Team</strong><br>
-  <em>Turning chaos into clarity, one incident at a time.</em>
-</p>
